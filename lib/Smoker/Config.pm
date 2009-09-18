@@ -37,12 +37,5 @@ sub get_middleware_setting {
     return \@middleware_conf;
 }
 
-=pod
-sub tmpl_path {
-    my $class = shift;
-    return $config_file_map->{$class->{env}}.'assets/tmpl/';
-}
-=cut
-
 1;
 

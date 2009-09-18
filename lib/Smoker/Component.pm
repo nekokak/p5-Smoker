@@ -1,8 +1,12 @@
 package Smoker::Component;
 use Smoker;
-use base 'Class::Accessor::Fast';
 use Carp;
 use UNIVERSAL::require;
+
+sub new {
+    my $class = shift;
+    bless {}, $class;
+}
 
 sub install_components {
     my ($class, @components) = @_;

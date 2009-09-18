@@ -1,6 +1,5 @@
 package Smoker::Web::Handler;
 use Smoker;
-use base 'Class::Accessor::Fast';
 use HTTP::Engine;
 use HTTP::Engine::Middleware;
 use UNIVERSAL::require;
@@ -8,8 +7,6 @@ use Smoker::Component::Request;
 use Smoker::Component::Response;
 use Smoker::Component::View;
 use Smoker::Web::Dispatcher;
-
-__PACKAGE__->mk_accessors(qw/context/);
 
 sub web_component { die 'this method is abstract' }
 sub base_name {};
@@ -19,17 +16,15 @@ sub config {
     $conf->use or die $@;
     $conf;
 }
+sub context { $_[0]->{_context} }
 
 sub init_context {
     my $self = shift;
-    $self->context(
-        $self->web_component->new
-    );
+    $self->{_context} = $self->web_component->new;
 }
 
 sub init_request {
     my ($self, $req) = @_;
-    warn 'install request';
     Smoker::Component::Request->install_to_component($self->web_component, $req);
 }
 
@@ -73,7 +68,6 @@ sub handler {
     $self->init_context;
     $self->init_request($req);
     $self->init_response;
-    $self->init_view;
 
     my $rule = Smoker::Web::Dispatcher->dispatch($self->base_name, $self->context->req);
     $rule->{controller_class}->use;
@@ -87,6 +81,8 @@ sub handler {
 
         my $res = $rule->{controller_class}->$method($self->context);
         unless (ref($res) eq'HTTP::Engine::Response') {
+
+            $self->init_view;
 
             my $view_class;
             unless ($self->context->{view_class}) {
